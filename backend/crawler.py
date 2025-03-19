@@ -218,3 +218,20 @@ async def crawl_site(self, base_url, depth=3, excluded_urls=None, concurrency=10
                 'end_time': self.scan_end_time.isoformat()
             }
         }
+def pause_scan(self):
+        #not finished
+        self.logger.info("Pause functionality requested")
+        return True
+        
+    def resume_scan(self):
+        #not finished
+        self.logger.info("Resume functionality requested")
+        return True
+        
+    def cancel_scan(self):
+        #not finished
+        if self.scan_in_progress:
+            self.scan_in_progress = False
+            self.logger.info("Scan cancelled")
+            return True
+        return False
