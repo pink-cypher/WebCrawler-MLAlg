@@ -45,7 +45,74 @@ def normalize_url(self, base_url, link):
         # Handle relative paths
         return urljoin(base_url, link)
 
+def filter_url(self, url, excluded_urls, base_domain):
+        """Filter URLs based on exclusion list and domain constraints"""
+        if not url:
+            return False
+            
+        # Check if URL is in exclusion list
+        for excluded in excluded_urls:
+            if excluded in url:
+                return False
+                
+        # Stay within the same domain if configured
+        parsed_url = urlparse(url)
+        parsed_base = urlparse(base_domain)
         
+        if parsed_url.netloc and parsed_url.netloc != parsed_base.netloc:
+            return False
+            
+        return True
+    
+    def extract_page_data(self, html, url):
+        """Extract useful data from the page"""
+        if not html:
+            return {
+                'url': url,
+                'title': '',
+                'word_count': 0,
+                'char_count': 0,
+                'links_found': 0,
+                'time_crawled': datetime.now().isoformat()
+            }
+            
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        # Extract title
+        title = soup.title.string if soup.title else ''
+        
+        # Extract text content
+        text_content = soup.get_text()
+        word_count = len(text_content.split())
+        char_count = len(text_content)
+        
+        # Extract links
+        links = [link.get('href') for link in soup.find_all('a', href=True)]
+        
+        # Extract logos, labels, and class titles (as requested in SRS document)
+        logo_elements = soup.find_all(class_=lambda c: c and 'logo' in c.lower())
+        label_elements = soup.find_all(['label'])
+        class_titles = [elem.get('class', []) for elem in soup.find_all(class_=True)]
+        
+        extracted_words = []
+        for element in logo_elements + label_elements:
+            if element.string:
+                extracted_words.append(element.string.strip())
+                
+        for classes in class_titles:
+            extracted_words.extend([c for c in classes if len(c) > 3])
+            
+        return {
+            'url': url,
+            'title': title,
+            'word_count': word_count,
+            'char_count': char_count,
+            'links_found': len(links),
+            'time_crawled': datetime.now().isoformat(),
+            'extracted_words': extracted_words,
+            'links': links
+        }
+
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
 
