@@ -1,10 +1,6 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-
-async def fetch_page(session, url):
-    async with session.get(url) as response:
-        return await response.text()
 import csv
 import os
 from urllib.parse import urljoin
@@ -12,7 +8,6 @@ from urllib.parse import urljoin
 # ---------- Save crawled data to CSV ----------
 def save_to_csv(data, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-
     print(f"Saving {len(data)} records to: {path}")
 
     keys = ['id', 'content', 'url']
@@ -50,7 +45,7 @@ async def fetch_page(session, url, timeout=10):
 # ---------- Crawl site function ----------
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
-
+    crawled_data = []
     async with aiohttp.ClientSession() as session:
         queue = [(base_url, 0)]
 
@@ -60,18 +55,6 @@ async def crawl_site(base_url, depth=2):
             if current_url in crawled_urls or current_depth > depth:
                 continue
 
-            crawled_urls.add(current_url)
-            page_content = await fetch_page(session, current_url)
-
-            soup = BeautifulSoup(page_content, 'html.parser')
-            links = [link.get('href') for link in soup.find_all('a', href=True)]
-            
-            for link in links:
-                absolute_url = current_url + link if link.startswith('/') else link
-                queue.append((absolute_url, current_depth + 1))
-                print(f"Crawled: {absolute_url}")  # Save to DB later
-
-    return list(crawled_urls)"test"
             page_content = await fetch_page(session, current_url)
 
             if page_content:
