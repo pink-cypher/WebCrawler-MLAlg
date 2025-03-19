@@ -1,42 +1,73 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+import csv
+import os
+
+def save_to_csv(data, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    print(f"Saving {len(data)} records to: {path}")
+
+    keys = ['id', 'content', 'url']
+    with open(path, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        writer.writerows(data)
+
+    print(f"Successfully saved to {path}")
+
+# Load URLs from TRACE-provided CSV
+def load_urls_from_csv(csv_path: str):
+    urls = []
+    with open(csv_path, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['website']:
+                urls.append(row['website'].strip())
+    return urls
 
 async def fetch_page(session, url):
-    try:
-        async with session.get(url, ssl=False, headers={'User-Agent': 'Mozilla/5.0'}) as response:
-            return await response.text()
-    except Exception as e:
-        print(f"Failed to fetch {url}: {str(e)}")
-        return ""
+    async with session.get(url, ssl=False) as response:
+        return await response.text()
 
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
+    queue = [(base_url, 0)]
+    crawled_data = []
 
     async with aiohttp.ClientSession() as session:
-        queue = [(base_url, 0)]
-
         while queue:
             current_url, current_depth = queue.pop(0)
-            
             if current_url in crawled_urls or current_depth > depth:
                 continue
 
-            print(f"Crawling: {current_url} at depth {current_depth}")
-            crawled_urls.add(current_url)
+            try:
+                page_content = await fetch_page(session, current_url)
+                soup = BeautifulSoup(page_content, 'html.parser')
 
-            page_content = await fetch_page(session, current_url)
-            if not page_content:
-                continue  # Skip if fetching failed
+                # Extract text
+                text = ' '.join(tag.get_text() for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'span']))
 
-            soup = BeautifulSoup(page_content, 'html.parser')
-            links = [link.get('href') for link in soup.find_all('a', href=True)]
+                crawled_data.append({
+                    'id': len(crawled_data) + 1,
+                    'content': text,
+                    'url': current_url
+                })
 
-            for link in links:
-                absolute_url = urljoin(current_url, link)
-
-                if absolute_url not in crawled_urls:
+                # Extract links
+                links = [link.get('href') for link in soup.find_all('a', href=True)]
+                for link in links:
+                    absolute_url = current_url + link if link.startswith('/') else link
                     queue.append((absolute_url, current_depth + 1))
 
-    return list(crawled_urls)
+                crawled_urls.add(current_url)
+                print(f'Crawled: {current_url} at depth {current_depth}')
+
+            except Exception as e:
+                print(f'Error crawling {current_url}: {e}')
+
+    # Save raw crawled data to CSV
+    save_to_csv(crawled_data, 'backend/data/crawled_data.csv')
+
+    return crawled_data
