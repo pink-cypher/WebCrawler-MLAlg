@@ -148,7 +148,6 @@ async def crawl_worker(self, session, queue, results, base_url, excluded_urls, m
             queue.task_done()
     
     def update_url_tree(self, url, page_data):
-        """Update the URL tree structure with crawled data"""
         parsed = urlparse(url)
         path_parts = parsed.path.strip('/').split('/')
         
@@ -168,26 +167,55 @@ async def crawl_worker(self, session, queue, results, base_url, excluded_urls, m
         
         current['data'] = page_data
 
-async def crawl_site(base_url, depth=2):
-    crawled_urls = set()
-
-    async with aiohttp.ClientSession() as session:
-        queue = [(base_url, 0)]
-
-        while queue:
-            current_url, current_depth = queue.pop(0)
-            if current_url in crawled_urls or current_depth > depth:
-                continue
-
-            crawled_urls.add(current_url)
-            page_content = await fetch_page(session, current_url)
-
-            soup = BeautifulSoup(page_content, 'html.parser')
-            links = [link.get('href') for link in soup.find_all('a', href=True)]
+async def crawl_site(self, base_url, depth=3, excluded_urls=None, concurrency=10):
+        if self.scan_in_progress:
+            self.logger.warning("A crawl operation is already in progress")
+            return None
             
-            for link in links:
-                absolute_url = current_url + link if link.startswith('/') else link
-                queue.append((absolute_url, current_depth + 1))
-                print(f"Crawled: {absolute_url}")  # Save to DB later
-
-    return list(crawled_urls)"test"
+        self.scan_in_progress = True
+        self.scan_start_time = datetime.now()
+        
+        excluded_urls = excluded_urls or []
+        self.crawled_urls.clear()
+        self.url_tree.clear()
+        self.max_concurrent_requests = concurrency
+        
+        results = []
+        
+        try:
+            connector = aiohttp.TCPConnector(limit=concurrency)
+            timeout = aiohttp.ClientTimeout(total=30)
+            
+            async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
+                queue = asyncio.Queue()
+                await queue.put((base_url, 0))
+                workers = [
+                    asyncio.create_task(
+                        self.crawl_worker(session, queue, results, base_url, excluded_urls, depth)
+                    )
+                    for _ in range(concurrency)
+                ]
+                await queue.join()
+                for worker in workers:
+                    worker.cancel()
+                await asyncio.gather(*workers, return_exceptions=True)
+        
+        except Exception as e:
+            self.logger.error(f"Error during crawl: {str(e)}")
+        finally:
+            self.scan_in_progress = False
+            self.scan_end_time = datetime.now()
+            
+            scan_time = (self.scan_end_time - self.scan_start_time).total_seconds()
+            self.logger.info(f"Crawl completed. Crawled {len(results)} URLs in {scan_time:.2f} seconds")
+            
+        return {
+            'results': results,
+            'url_tree': self.url_tree,
+            'stats': {
+                'urls_crawled': len(results),
+                'scan_time_seconds': (self.scan_end_time - self.scan_start_time).total_seconds(),
+                'start_time': self.scan_start_time.isoformat(),
+                'end_time': self.scan_end_time.isoformat()
+            }
+        }
