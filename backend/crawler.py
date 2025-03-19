@@ -1,6 +1,7 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
+<<<<<<< HEAD
 import csv
 import os
 
@@ -30,6 +31,25 @@ def load_urls_from_csv(csv_path: str):
 async def fetch_page(session, url):
     async with session.get(url, ssl=False) as response:
         return await response.text()
+=======
+from urllib.parse import urljoin, urlparse
+import logging
+from datetime import datetime
+
+async def fetch_page(self, session, url, timeout=10):
+        "Fetch a page with timeout and error handling"
+        try:
+            async with session.get(url, timeout=timeout) as response:
+                if response.status == 200:
+                    self.logger.info(f"Crawled: {url} (Status: {response.status})")
+                    return await response.text(), response.status
+                else:
+                    self.logger.warning(f"Failed to crawl: {url} (Status: {response.status})")
+                    return None, response.status
+        except Exception as e:
+            self.logger.error(f"Error crawling {url}: {str(e)}")
+            return None, 0
+>>>>>>> a530d28d76556a047671f79e7413b82f45e26bbc
 
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
@@ -49,6 +69,7 @@ async def crawl_site(base_url, depth=2):
                 # Extract text
                 text = ' '.join(tag.get_text() for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'span']))
 
+<<<<<<< HEAD
                 crawled_data.append({
                     'id': len(crawled_data) + 1,
                     'content': text,
@@ -71,3 +92,6 @@ async def crawl_site(base_url, depth=2):
     save_to_csv(crawled_data, 'backend/data/crawled_data.csv')
 
     return crawled_data
+=======
+    return list(crawled_urls)"test"
+>>>>>>> a530d28d76556a047671f79e7413b82f45e26bbc
