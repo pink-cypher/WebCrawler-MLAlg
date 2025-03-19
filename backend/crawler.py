@@ -113,6 +113,61 @@ def filter_url(self, url, excluded_urls, base_domain):
             'links': links
         }
 
+async def crawl_worker(self, session, queue, results, base_url, excluded_urls, max_depth):
+        """Worker function for concurrent crawling"""
+        while not queue.empty():
+            current_url, current_depth = await queue.get()
+            
+            if current_url in self.crawled_urls or current_depth > max_depth:
+                queue.task_done()
+                continue
+                
+            self.crawled_urls.add(current_url)
+            
+            html, status = await self.fetch_page(session, current_url)
+            if html:
+                page_data = self.extract_page_data(html, current_url)
+                results.append(page_data)
+                
+                # Update tree
+                self.update_url_tree(current_url, page_data)
+                
+                # Only continue if haven't reached max depth
+                if current_depth < max_depth:
+                    soup = BeautifulSoup(html, 'html.parser')
+                    links = [link.get('href') for link in soup.find_all('a', href=True)]
+                    
+                    
+                    for link in links:
+                        normalized_url = self.normalize_url(current_url, link)
+                        if (normalized_url and
+                            normalized_url not in self.crawled_urls and
+                            self.filter_url(normalized_url, excluded_urls, base_url)):
+                            await queue.put((normalized_url, current_depth + 1))
+            
+            queue.task_done()
+    
+    def update_url_tree(self, url, page_data):
+        """Update the URL tree structure with crawled data"""
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        
+        current = self.url_tree
+        domain = f"{parsed.scheme}://{parsed.netloc}"
+        
+        if domain not in current:
+            current[domain] = {'data': {}, 'children': {}}
+        
+        current = current[domain]
+        
+        for part in path_parts:
+            if part:
+                if part not in current['children']:
+                    current['children'][part] = {'data': {}, 'children': {}}
+                current = current['children'][part]
+        
+        current['data'] = page_data
+
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
 
