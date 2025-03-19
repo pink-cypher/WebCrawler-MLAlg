@@ -1,6 +1,9 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+import logging
+from datetime import datetime
 
 async def fetch_page(self, session, url, timeout=10):
         "Fetch a page with timeout and error handling"
