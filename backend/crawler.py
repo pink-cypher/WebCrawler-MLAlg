@@ -1,10 +1,11 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-<<<<<<< HEAD
 import csv
 import os
+from urllib.parse import urljoin
 
+# ---------- Save crawled data to CSV ----------
 def save_to_csv(data, path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
@@ -18,7 +19,7 @@ def save_to_csv(data, path):
 
     print(f"Successfully saved to {path}")
 
-# Load URLs from TRACE-provided CSV
+# ---------- Load URLs from CSV ----------
 def load_urls_from_csv(csv_path: str):
     urls = []
     with open(csv_path, 'r', encoding='utf-8') as file:
@@ -28,29 +29,21 @@ def load_urls_from_csv(csv_path: str):
                 urls.append(row['website'].strip())
     return urls
 
-async def fetch_page(session, url):
-    async with session.get(url, ssl=False) as response:
-        return await response.text()
-=======
-from urllib.parse import urljoin, urlparse
-import logging
-from datetime import datetime
+# ---------- Fetch a page ----------
+async def fetch_page(session, url, timeout=10):
+    try:
+        async with session.get(url, ssl=False, timeout=timeout) as response:
+            if response.status == 200:
+                print(f"Crawled: {url} (Status: {response.status})")
+                return await response.text()
+            else:
+                print(f"Failed to crawl: {url} (Status: {response.status})")
+                return None
+    except Exception as e:
+        print(f"Error crawling {url}: {str(e)}")
+        return None
 
-async def fetch_page(self, session, url, timeout=10):
-        "Fetch a page with timeout and error handling"
-        try:
-            async with session.get(url, timeout=timeout) as response:
-                if response.status == 200:
-                    self.logger.info(f"Crawled: {url} (Status: {response.status})")
-                    return await response.text(), response.status
-                else:
-                    self.logger.warning(f"Failed to crawl: {url} (Status: {response.status})")
-                    return None, response.status
-        except Exception as e:
-            self.logger.error(f"Error crawling {url}: {str(e)}")
-            return None, 0
->>>>>>> a530d28d76556a047671f79e7413b82f45e26bbc
-
+# ---------- Crawl site function ----------
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
     queue = [(base_url, 0)]
@@ -59,39 +52,38 @@ async def crawl_site(base_url, depth=2):
     async with aiohttp.ClientSession() as session:
         while queue:
             current_url, current_depth = queue.pop(0)
+
             if current_url in crawled_urls or current_depth > depth:
                 continue
 
-            try:
-                page_content = await fetch_page(session, current_url)
+            page_content = await fetch_page(session, current_url)
+
+            if page_content:
                 soup = BeautifulSoup(page_content, 'html.parser')
 
-                # Extract text
+                # Extract text from the page
                 text = ' '.join(tag.get_text() for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'span']))
 
-<<<<<<< HEAD
                 crawled_data.append({
                     'id': len(crawled_data) + 1,
                     'content': text,
                     'url': current_url
                 })
 
-                # Extract links
+                # Extract all links and make them absolute
                 links = [link.get('href') for link in soup.find_all('a', href=True)]
+
                 for link in links:
-                    absolute_url = current_url + link if link.startswith('/') else link
+                    absolute_url = urljoin(current_url, link)
                     queue.append((absolute_url, current_depth + 1))
 
                 crawled_urls.add(current_url)
                 print(f'Crawled: {current_url} at depth {current_depth}')
 
-            except Exception as e:
-                print(f'Error crawling {current_url}: {e}')
+            else:
+                print(f"Skipping {current_url} due to error or no content")
 
-    # Save raw crawled data to CSV
+    # Save crawled data to CSV after crawling is done
     save_to_csv(crawled_data, 'backend/data/crawled_data.csv')
 
     return crawled_data
-=======
-    return list(crawled_urls)"test"
->>>>>>> a530d28d76556a047671f79e7413b82f45e26bbc
