@@ -2,9 +2,19 @@ import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
 
-async def fetch_page(session, url):
-    async with session.get(url) as response:
-        return await response.text()
+async def fetch_page(self, session, url, timeout=10):
+        "Fetch a page with timeout and error handling"
+        try:
+            async with session.get(url, timeout=timeout) as response:
+                if response.status == 200:
+                    self.logger.info(f"Crawled: {url} (Status: {response.status})")
+                    return await response.text(), response.status
+                else:
+                    self.logger.warning(f"Failed to crawl: {url} (Status: {response.status})")
+                    return None, response.status
+        except Exception as e:
+            self.logger.error(f"Error crawling {url}: {str(e)}")
+            return None, 0
 
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
