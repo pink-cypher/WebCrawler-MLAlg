@@ -10,7 +10,7 @@ class Crawler:
         self.crawled_urls = set()
         self.url_tree = {}
         self.logger = logger or logging.getLogger(__name__)
-        self.max_concurrent_requests = 10  # Configurable concurrency limit
+        self.max_concurrent_requests = 10
         self.scan_in_progress = False
         self.scan_start_time = None
         self.scan_end_time = None
@@ -123,7 +123,6 @@ async def crawl_worker(self, session, queue, results, base_url, excluded_urls, m
                 continue
                 
             self.crawled_urls.add(current_url)
-            
             html, status = await self.fetch_page(session, current_url)
             if html:
                 page_data = self.extract_page_data(html, current_url)
