@@ -5,6 +5,16 @@ from urllib.parse import urljoin, urlparse
 import logging
 from datetime import datetime
 
+class Crawler:
+    def __init__(self, logger=None):
+        self.crawled_urls = set()
+        self.url_tree = {}
+        self.logger = logger or logging.getLogger(__name__)
+        self.max_concurrent_requests = 10  # Configurable concurrency limit
+        self.scan_in_progress = False
+        self.scan_start_time = None
+        self.scan_end_time = None
+
 async def fetch_page(self, session, url, timeout=10):
         "Fetch a page with timeout and error handling"
         try:
@@ -19,6 +29,23 @@ async def fetch_page(self, session, url, timeout=10):
             self.logger.error(f"Error crawling {url}: {str(e)}")
             return None, 0
 
+def normalize_url(self, base_url, link):
+        """Normalize URLs to prevent duplicate crawling"""
+        if not link:
+            return None
+            
+        # Handle relative URLs
+        if link.startswith('/'):
+            return urljoin(base_url, link)
+        
+        # Handle full URLs
+        if link.startswith(('http://', 'https://')):
+            return link
+            
+        # Handle relative paths
+        return urljoin(base_url, link)
+
+        
 async def crawl_site(base_url, depth=2):
     crawled_urls = set()
 
