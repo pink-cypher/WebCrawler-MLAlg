@@ -90,35 +90,53 @@
       <div class="options">
         <div class="option-block">
           <h3>Username</h3>
-          <div>
-            <input type="checkbox" id="u-chars" />
-            <label for="u-chars">Characters</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="u-chars" />
+              <span class="slider round"></span>
+            </label>
+            <span>Characters</span>
           </div>
-          <div>
-            <input type="checkbox" id="u-numbers" checked />
-            <label for="u-numbers">Numbers</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="u-numbers" checked />
+              <span class="slider round"></span>
+            </label>
+            <span>Numbers</span>
           </div>
-          <div>
-            <input type="checkbox" id="u-symbols" checked />
-            <label for="u-symbols">Symbols</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="u-symbols" checked />
+              <span class="slider round"></span>
+            </label>
+            <span>Symbols</span>
           </div>
-          <label>Length</label>
-          <input type="number" value="12" />
-        </div>
+        <label>Length</label>
+        <input type="number" value="12" />
+      </div>
 
         <div class="option-block">
           <h3>Password</h3>
-          <div>
-            <input type="checkbox" id="p-chars" checked />
-            <label for="p-chars">Characters</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="p-chars" checked />
+              <span class="slider round"></span>
+            </label>
+            <span>Characters</span>
           </div>
-          <div>
-            <input type="checkbox" id="p-numbers" />
-            <label for="p-numbers">Numbers</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="p-numbers" />
+              <span class="slider round"></span>
+            </label>
+            <span>Numbers</span>
           </div>
-          <div>
-            <input type="checkbox" id="p-symbols" />
-            <label for="p-symbols">Symbols</label>
+          <div class="toggle-group">
+            <label class="switch">
+              <input type="checkbox" id="p-symbols" />
+              <span class="slider round"></span>
+            </label>
+            <span>Symbols</span>
           </div>
           <label>Length</label>
           <input type="number" value="12" />
@@ -178,6 +196,34 @@
 </div>
 
 <style>
+  :global(body) {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+  }
+
+  :global(.toggle-group label.switch) {
+    margin-right: 8px;
+  }
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    padding: 2rem;
+    text-align: center; /* centers titles, buttons, etc. */
+  }
+
+  /* White Box (Config Section) */
+  .config {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    max-width: 900px;
+    margin: 0 auto 1rem auto; /* centers the box horizontally with a bottom margin */
+    text-align: left; /* ensures inner elements remain left-aligned */
+  }
+
   /* Container & Base */
   .container {
     display: flex;
@@ -395,4 +441,68 @@
     border-radius: 4px;
     max-width: 600px;
   }
+
+  /* Toggle Switch Styles */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-left: 10px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+  }
+
+  input:checked + .slider {
+    background-color: #4fd1c5;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .slider.round {
+    border-radius: 20px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .toggle-group span {
+    font-size: 0.95rem;
+  }
+
 </style>
