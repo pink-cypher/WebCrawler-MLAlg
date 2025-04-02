@@ -1,12 +1,32 @@
 <script>
-    let tools = [
-      { name: "HTTP Tester", progress: 0, status: "Ready to Go!" },
-      { name: "SQL Injection", progress: 0, status: "Ready to Go!" },
-      { name: "Parameter Fuzzing", progress: 0, status: "Ready to Go!" },
-      { name: "Brute Force Tester", progress: 0, status: "Ready to Go!" },
-      { name: "Intruder", progress: 0, status: "Ready to Go!" },
-      { name: "Crawler", progress: 0, status: "Ready to Go!" }
-    ];
+  import { goto } from '$app/navigation';
+
+  let tools = [
+    { name: "Web Crawler", progress: 0, status: "Ready to Go!" },
+    { name: "ML Generator", progress: 0, status: "Ready to Go!" },
+    { name: "Parameter Fuzzing", progress: 0, status: "Ready to Go!" },
+    { name: "Brute Force Tester", progress: 0, status: "Ready to Go!" },
+    { name: "SQL Injection", progress: 0, status: "Ready to Go!" },
+    { name: "HTTP Tester", progress: 0, status: "Ready to Go!" }
+  ];
+
+  /**
+   * @param {{ name: any; progress: any; status?: string; }} tool
+   */
+    function handleAction(tool) {
+    // Only act if progress is 0 ("Set Up" button)
+    if (tool.progress === 0) {
+      if (tool.name === "Web Crawler") {
+        goto('/crawler');
+      } else if (tool.name === "ML Generator") {
+        goto('/ml');
+      } else {
+        alert("This tool is not ready yet.");
+      }
+    } else {
+      // If progress is non-zero, you could display the tool's dashboard or details.
+    }
+  }
 </script>
   
   <div class="container">
@@ -54,26 +74,29 @@
         </div>
     </div>
   
-    <!-- Main Content -->
-    <main class="main-content">
-      <header class="crawler-header">
-        <h1>Tool Dashboard</h1>
-        <!----><p class="subheader">Select a tool from the menu below.</p>
-      </header>
-      
-        {#each tools as tool}
-        <div class="tool-item">
-            <span>{tool.name}</span><br>
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="crawler-header">
+      <h1>Tool Dashboard</h1>
+      <p class="subheader">Select a tool from the menu below.</p>
+    </header>
+    
+    {#each tools as tool}
+      <div class="tool-item">
+        <span>{tool.name}</span><br>
         <div class="progress-bar">
           <div class="progress-fill" style="width: {tool.progress}%;"></div>
         </div>
-            <span class="status">{tool.status}</span>
-            <button class="info-btn">Info</button>
-            <button class="action-btn">{tool.progress === 0 ? 'Set Up' : 'View'}</button>
-        </div>
-        {/each}
-    </main>
+        <span class="status">{tool.status}</span>
+        <button class="info-btn">Info</button>
+        <button class="action-btn" on:click={() => handleAction(tool)}>
+          {tool.progress === 0 ? 'Set Up' : 'View'}
+        </button>
+      </div>
+    {/each}
+  </main>
   </div>
+
   
   <style>
     /* Base styles */

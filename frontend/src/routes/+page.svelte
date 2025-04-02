@@ -42,7 +42,7 @@
       Vulnerabilities, Strengthen Defense, and Secure Your Network Seamlessly.<br />
       Gain Real-Time Insights and Proactive Protection.
     </p>
-    <a class="start-btn" href="/start">START</a>
+    <a class="start-btn" href="/dashboard">START</a>
   </section>
 
   <footer>© 2025 Team 11 - MinerSoft 🚀</footer>
