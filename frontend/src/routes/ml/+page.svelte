@@ -32,19 +32,24 @@
   <!-- Sidebar (from Crawler) -->
   <div class="sidebar">
     <div class="logo">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 17L12 22L22 17" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+        <!-- svelte-ignore a11y_consider_explicit_label -->
+        <a href="/" class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#55B7B9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
     </div>
 
     <div class="sidebar-icons">
-      <div class="sidebar-icon">
+      <!-- svelte-ignore a11y_consider_explicit_label -->
+      <a href="/dashboard" class="sidebar-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" 
+            stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </div>
+      </a>
       <div class="sidebar-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="3" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
