@@ -11,6 +11,8 @@
   let isLoading = false;
   let currentStep: 'configuration' | 'running' | 'results' = 'configuration';
   let scanProgress: number = 30;
+  let currentTask: number = 1;
+
 
   // Metrics
   let runningTime: string = '75.036';
@@ -62,6 +64,7 @@
         // Simulate progress updates
         for (let i = 0; i <= 100; i += 10) {
           scanProgress = i;
+          currentTask = Math.min(depth, Math.ceil((i / 100) * depth)); 
           await new Promise(resolve => setTimeout(resolve, 500));
           
           // Add sample results incrementally
@@ -303,6 +306,13 @@
           </div>
           <div class="scan-progress-bar">
             <div class="scan-progress-fill" style="width: {scanProgress}%"></div>
+          </div>
+          <div class="multi-task-progress">
+            {#each Array(depth) as _, index}
+              <div class="task-segment {index + 1 < currentTask ? 'completed' : index + 1 === currentTask ? 'active' : ''}">
+                Task {index + 1}/{depth}
+              </div>
+            {/each}
           </div>
         </div>
 
@@ -791,4 +801,37 @@
     margin-left: 8px;
     vertical-align: middle;
   }
+
+
+  .multi-task-progress {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.task-segment {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: #edf2f7;
+  color: #4a5568;
+  font-weight: 500;
+  border: 1px solid #cbd5e0;
+  transition: all 0.3s ease;
+}
+
+.task-segment.active {
+  background-color: #facc15;
+  color: #1a202c;
+  border-color: #ecc94b;
+}
+
+.task-segment.completed {
+  background-color: #48bb78;
+  color: white;
+  border-color: #38a169;
+}
+
 </style>
