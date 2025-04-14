@@ -1,5 +1,6 @@
 import random
 import csv
+import collections
 
 class MarkovModel:
     def __init__(self):
@@ -39,11 +40,26 @@ def generate_credentials(cleaned_csv_path, output_file='backend/data/crackedpass
     model = MarkovModel()
     model.train(words)
 
-    generated = [model.generate() for _ in range(10)]
-    print("Generated credentials:", generated)
+    raw_generated = [model.generate() for _ in range(50)]
+    root_counts = collections.defaultdict(list)
+    final_creds = [] 
+
+    # Enforcing an upper bound of 20% repetition for username/password roots
+    max_final = 10
+    max_per_root = max(1, int(max_final * 0.2))
+
+    for cred in raw_generated:
+        root = cred[:4]
+        if len(root_counts[root]) < max_per_root:
+            root_counts[root].append(cred)
+            final_creds.append(cred)
+        if len(final_creds) >= max_final:
+            break
+    
+    print("Generated credentials:", final_creds)
 
     with open(output_file, "w") as f:
-        for cred in generated:
+        for cred in final_creds:
             f.write(cred + "\n")
 
-    return generated
+    return final_creds
